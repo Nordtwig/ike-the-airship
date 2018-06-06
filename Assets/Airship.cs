@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Airship : MonoBehaviour {
+
+    //TODO Fix lightning bug
 
     [SerializeField]
     float lateralThrust, mainThrust;
@@ -8,32 +11,57 @@ public class Airship : MonoBehaviour {
     Rigidbody rigidBody;
 	AudioSource audioSource;
 
-	// Use this for initialization
-	void Start () {
+    enum State {Alive, Dying, Transcending};
+    State state = State.Alive;
+
+    // Use this for initialization
+    void Start () {
 		rigidBody = GetComponent<Rigidbody> ();
 		audioSource = GetComponent<AudioSource> ();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		Thrust ();
-		Rotate ();
+        if (state == State.Alive) {
+            Thrust();
+            Rotate();
+        }
 	}
 
     void OnCollisionEnter(Collision collision) {
         switch (collision.gameObject.tag) {
             case "Friendly":
-                print("Safe");
+                state = State.Alive;
+                //Do nothing
                 break;
-            case "Fuel":
-                print("Topped Up");
+            case "Finish":
+                /*if (SceneManager.GetActiveScene().buildIndex == 0)
+                {
+                    SceneManager.LoadScene(1);
+                }
+                else if (SceneManager.GetActiveScene().buildIndex == 1) {
+                    SceneManager.LoadScene(1);
+                }*/
+                state = State.Transcending;
+                Invoke("LoadNextLevel", 1f); //parameterize this time
                 break;
             default:
                 print("Dead");
-                //kill player
+                state = State.Dying;
+                Invoke("LoadFirstLevel", 1f);
                 break;
         }
 
+    }
+
+    private void LoadNextLevel()
+    {
+        SceneManager.LoadScene(1); //TODO allow for more levels
+    }
+
+    private void LoadFirstLevel()
+    {
+        SceneManager.LoadScene(0);  
     }
 
     private void Thrust() {
