@@ -1,57 +1,79 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Airship : MonoBehaviour {
 
-    //TODO Fix lightning bug
+    [Header("Variables")]
+    [SerializeField] float lateralThrust = 200f;
+    [SerializeField] float mainThrust = 20f;
+    [SerializeField] float levelLoadDelay = 1f;
 
-    [SerializeField]
-    float lateralThrust, mainThrust;
+    [Header("Audio")]
+    [SerializeField] AudioClip mainEngine;
+    [SerializeField] AudioClip deathSound;
+    [SerializeField] AudioClip winSound;
+    [SerializeField] AudioClip loadSound;
+
+    [Header("Particles")]
+    [SerializeField] ParticleSystem mainEngineParticles;
+    [SerializeField] ParticleSystem deathParticles;
+    [SerializeField] ParticleSystem winParticles;
 
     Rigidbody rigidBody;
 	AudioSource audioSource;
 
     enum State {Alive, Dying, Transcending};
-    State state = State.Alive;
+    State state;
 
     // Use this for initialization
     void Start () {
-		rigidBody = GetComponent<Rigidbody> ();
+        state = State.Alive;
+        rigidBody = GetComponent<Rigidbody> ();
 		audioSource = GetComponent<AudioSource> ();
 	}
 	
 	// Update is called once per frame
 	void Update () {
+        //TODO Somewhere stop sound on death
         if (state == State.Alive) {
-            Thrust();
-            Rotate();
+            RespondToThrustInput();
+            RespondToRotateInput();
         }
 	}
 
     void OnCollisionEnter(Collision collision) {
+        if (state != State.Alive) { return; }
+
         switch (collision.gameObject.tag) {
             case "Friendly":
-                state = State.Alive;
-                //Do nothing
                 break;
             case "Finish":
-                /*if (SceneManager.GetActiveScene().buildIndex == 0)
-                {
-                    SceneManager.LoadScene(1);
-                }
-                else if (SceneManager.GetActiveScene().buildIndex == 1) {
-                    SceneManager.LoadScene(1);
-                }*/
-                state = State.Transcending;
-                Invoke("LoadNextLevel", 1f); //parameterize this time
+                StartWinSequence();
                 break;
             default:
-                print("Dead");
-                state = State.Dying;
-                Invoke("LoadFirstLevel", 1f);
+                StartDeathSequence();
                 break;
         }
 
+    }
+
+    private void StartWinSequence()
+    {
+        state = State.Transcending;
+        audioSource.Stop();
+        audioSource.PlayOneShot(winSound);
+        winParticles.Play();
+        Invoke("LoadNextLevel", levelLoadDelay); //parameterize this time
+    }
+
+    private void StartDeathSequence()
+    {
+        state = State.Dying;
+        audioSource.Stop();
+        audioSource.PlayOneShot(deathSound);
+        deathParticles.Play();
+        Invoke("LoadFirstLevel", levelLoadDelay);
     }
 
     private void LoadNextLevel()
@@ -64,24 +86,19 @@ public class Airship : MonoBehaviour {
         SceneManager.LoadScene(0);  
     }
 
-    private void Thrust() {
+    private void RespondToThrustInput() {
         if (Input.GetKey(KeyCode.Space))
-        {
-            //Can thrust while rotating
-            rigidBody.AddRelativeForce(Vector3.up * mainThrust);
-            if (!audioSource.isPlaying)
-            {
-                //So it doesn't layer sound
-                audioSource.Play();
-            }
+        { //Can thrust while rotating
+            ApplyThrust();
         }
         else
         {
             audioSource.Stop();
+            mainEngineParticles.Stop();
         }
     }
 
-    private void Rotate () {
+    private void RespondToRotateInput () {
         rigidBody.freezeRotation = true; //take manual control of rotation
 
         float rotationThisFrame = lateralThrust * Time.deltaTime;
@@ -93,5 +110,16 @@ public class Airship : MonoBehaviour {
 		}
 
         rigidBody.freezeRotation = false;
+    }
+
+    private void ApplyThrust()
+    {
+        rigidBody.AddRelativeForce(Vector3.up * mainThrust * Time.deltaTime);
+        if (!audioSource.isPlaying)
+        {
+            //So it doesn't layer sound
+            audioSource.PlayOneShot(mainEngine);
+        }
+        mainEngineParticles.Play();
     }
 }
