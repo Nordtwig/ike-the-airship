@@ -52,6 +52,7 @@ public class Airship : MonoBehaviour {
                 StartWinSequence();
                 break;
             default:
+                print(collision.gameObject.tag);
                 StartDeathSequence();
                 break;
         }
