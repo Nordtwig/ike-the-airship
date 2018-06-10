@@ -1956,6 +1956,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lateralThrust: 200
   mainThrust: 1000
+  levelLoadDelay: 1
   mainEngine: {fileID: 8300000, guid: 57d18b47167ab8b44ba0486b09e2797f, type: 3}
   deathSound: {fileID: 8300000, guid: 40e08e4ee5479fb438a9f916b34a2b24, type: 3}
   winSound: {fileID: 8300000, guid: 6ac73fa9f7162354ebf2dbf0ad050fc5, type: 3}

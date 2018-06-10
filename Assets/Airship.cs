@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Airship : MonoBehaviour {
@@ -20,10 +19,12 @@ public class Airship : MonoBehaviour {
     [SerializeField] ParticleSystem deathParticles;
     [SerializeField] ParticleSystem winParticles;
 
+    bool collisionsDisabled = false;
+
     Rigidbody rigidBody;
 	AudioSource audioSource;
 
-    enum State {Alive, Dying, Transcending};
+    enum State {Alive, Dying, Transcending, Debug};
     State state;
 
     // Use this for initialization
@@ -36,14 +37,18 @@ public class Airship : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         //TODO Somewhere stop sound on death
-        if (state == State.Alive) {
+        if (state == State.Alive || state == State.Debug) {
             RespondToThrustInput();
             RespondToRotateInput();
         }
+        if (Debug.isDebugBuild) {
+            RespondToDebugKeys();
+        }
+        
 	}
 
     void OnCollisionEnter(Collision collision) {
-        if (state != State.Alive) { return; }
+        if (state != State.Alive || collisionsDisabled) { return; }
 
         switch (collision.gameObject.tag) {
             case "Friendly":
@@ -79,7 +84,12 @@ public class Airship : MonoBehaviour {
 
     private void LoadNextLevel()
     {
-        SceneManager.LoadScene(1); //TODO allow for more levels
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        int nextSceneIndex = currentSceneIndex + 1;
+        if (nextSceneIndex == SceneManager.sceneCountInBuildSettings) {
+            nextSceneIndex = 0; //loop back to start
+        }
+        SceneManager.LoadScene(nextSceneIndex);
     }
 
     private void LoadFirstLevel()
@@ -122,5 +132,17 @@ public class Airship : MonoBehaviour {
             audioSource.PlayOneShot(mainEngine);
         }
         mainEngineParticles.Play();
+    }
+
+    private void RespondToDebugKeys() {
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            collisionsDisabled = !collisionsDisabled;
+        }
+        else if (Input.GetKeyDown(KeyCode.L))
+        {
+            print("Next Level Override!");
+            LoadNextLevel();
+        }
     }
 }
