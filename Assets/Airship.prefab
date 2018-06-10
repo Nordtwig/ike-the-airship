@@ -1957,6 +1957,8 @@ MonoBehaviour:
   lateralThrust: 200
   mainThrust: 1000
   levelLoadDelay: 1
+  cameraDistance: 75
+  cameraScrollSpeed: 3
   mainEngine: {fileID: 8300000, guid: 57d18b47167ab8b44ba0486b09e2797f, type: 3}
   deathSound: {fileID: 8300000, guid: 40e08e4ee5479fb438a9f916b34a2b24, type: 3}
   winSound: {fileID: 8300000, guid: 6ac73fa9f7162354ebf2dbf0ad050fc5, type: 3}
@@ -1964,6 +1966,7 @@ MonoBehaviour:
   mainEngineParticles: {fileID: 198976671894829422}
   deathParticles: {fileID: 198065327952040024}
   winParticles: {fileID: 198171247474170298}
+  airshipCamera: {fileID: 0}
 --- !u!198 &198065327952040024
 ParticleSystem:
   m_ObjectHideFlags: 1

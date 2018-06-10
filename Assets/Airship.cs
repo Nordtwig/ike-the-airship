@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Airship : MonoBehaviour {
@@ -7,6 +8,8 @@ public class Airship : MonoBehaviour {
     [SerializeField] float lateralThrust = 200f;
     [SerializeField] float mainThrust = 20f;
     [SerializeField] float levelLoadDelay = 1f;
+    [SerializeField] float cameraDistance = 30f;
+    [SerializeField] float cameraScrollSpeed = 5;
 
     [Header("Audio")]
     [SerializeField] AudioClip mainEngine;
@@ -19,10 +22,15 @@ public class Airship : MonoBehaviour {
     [SerializeField] ParticleSystem deathParticles;
     [SerializeField] ParticleSystem winParticles;
 
+    [Header("Components")]
+    [SerializeField] Camera airshipCamera;
+
     bool collisionsDisabled = false;
 
+    
     Rigidbody rigidBody;
 	AudioSource audioSource;
+   
 
     enum State {Alive, Dying, Transcending, Debug};
     State state;
@@ -37,15 +45,31 @@ public class Airship : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         //TODO Somewhere stop sound on death
+        airshipCamera.transform.position = new Vector3(transform.position.x, transform.position.y, -cameraDistance);
         if (state == State.Alive || state == State.Debug) {
             RespondToThrustInput();
             RespondToRotateInput();
+            RespondToZoomInput();
         }
         if (Debug.isDebugBuild) {
             RespondToDebugKeys();
         }
         
+        
 	}
+
+    private void RespondToZoomInput()
+    {
+        if (Input.GetAxis("Mouse ScrollWheel") != 0) {
+            if (Input.GetAxis("Mouse ScrollWheel") >= 0)
+            {
+                cameraDistance = cameraDistance - cameraScrollSpeed;
+            }
+            else {
+                cameraDistance = cameraDistance + cameraScrollSpeed;
+            }
+        }
+    }
 
     void OnCollisionEnter(Collision collision) {
         if (state != State.Alive || collisionsDisabled) { return; }
