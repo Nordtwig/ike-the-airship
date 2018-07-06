@@ -18,7 +18,8 @@ public class Airship : MonoBehaviour {
     [SerializeField] AudioClip loadSound;
 
     [Header("Particles")]
-    [SerializeField] ParticleSystem mainEngineParticles;
+    [SerializeField] ParticleSystem leftEngineParticles;
+    [SerializeField] ParticleSystem rightEngineParticles;
     [SerializeField] ParticleSystem deathParticles;
     [SerializeField] ParticleSystem winParticles;
 
@@ -129,7 +130,8 @@ public class Airship : MonoBehaviour {
         else
         {
             audioSource.Stop();
-            mainEngineParticles.Stop();
+            leftEngineParticles.Stop();
+            rightEngineParticles.Stop();
         }
     }
 
@@ -155,7 +157,8 @@ public class Airship : MonoBehaviour {
             //So it doesn't layer sound
             audioSource.PlayOneShot(mainEngine);
         }
-        mainEngineParticles.Play();
+        leftEngineParticles.Play();
+        rightEngineParticles.Play();
     }
 
     private void RespondToDebugKeys() {
